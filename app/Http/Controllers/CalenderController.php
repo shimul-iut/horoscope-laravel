@@ -31,6 +31,7 @@ class CalenderController extends Controller
 
     public function store(Request $request)
     {
+        # To keep the demonstration minimal, Only years from 2021 to 2030 are allowed. Although this app is prepared to take unlimited year values 
         $request->validate([
              'year' => 'required|integer|between:2021,2030',
              'zodiac_id' => 'required|integer|between:1,12',
@@ -42,6 +43,7 @@ class CalenderController extends Controller
         try{
             for($i = 1; $i <= 12 ; $i++){
                 
+                #Creating the Horoscope calender entry of a given sign and year
                 $calender = new HoroscopeCalender();
 
                 $totalScore = 0;
@@ -56,10 +58,13 @@ class CalenderController extends Controller
                 for($j = 1; $j <= $days_in_the_month ; $j++){
                     
                     $score = new HoroscopeScore();
-
+                    # Creating the Randomized Horoscope Score and Hex value entries for each day of the year entered previously
                     $score->horoscope_calender_id = $calender->id;
                     $score->day = $j;
                     $score->score = rand(1,10);
+                    
+                    # Two Utility Functions imported from the Util Class for randomized Color codes and Sentences
+
                     $score->mark = $this->utils->colourBrightness($this->shittyColor, $this->superColor, $score->score );
                     $score->prophecy = $this->utils->fortuneCookie($score->score);
                     $score->save();
@@ -84,6 +89,7 @@ class CalenderController extends Controller
     
 
     public function allZodiacs(Request $request){
+
         $request->validate([
             'year' => 'required|integer|between:2021,2030',
             
@@ -94,7 +100,10 @@ class CalenderController extends Controller
         if(HoroscopeCalender::where('year', $request->year)->count() == 144) return HoroscopeCalender::select('zodiac_id', 'total_score')->where('year', $request->year)->with('parentZodiac')->orderBy('total_score', 'desc')->take(2)->get();
         try{
            foreach($zodiac as $sign){
+
+            #Performing the same task as the 'store' method, just for all the available Zodiac signs for a given year
             $yearlyTotalScorePerZodiac = 0;
+            
             if(!HoroscopeCalender::where('year', $request->year)->where('zodiac_id' , $sign->id)->exists()){
                 for($i = 1; $i <= 12 ; $i++){
                     $totalScore = 0;
